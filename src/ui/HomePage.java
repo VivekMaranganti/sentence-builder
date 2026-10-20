@@ -8,94 +8,22 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.SVGPath;
 
 /**
- * The Home page: a sidebar on the left and the overview in the middle.
+ * The Home page: an overview of the word database.
  * Buttons for the other pages are here but don't do anything yet.
  */
 public class HomePage {
 
-    // Sidebar icons (SVG path drawings, 24x24)
-    private static final String HOME_ICON = "M3 11l9-8 9 8M5 10v10h14V10";
-    private static final String IMPORT_ICON = "M12 3v12M7 10l5 5 5-5M4 21h16";
-    private static final String GENERATE_ICON = "M4 20l4-1 11-11-3-3L5 16l-1 4z";
-    private static final String BATCH_ICON = "M12 3l9 5-9 5-9-5 9-5zM3 13l9 5 9-5";
-    private static final String AUTOCOMPLETE_ICON = "M5 6h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2zM7 10h1M11 10h1M15 10h1M7 14h10";
-    private static final String WORDS_ICON = "M4 5h16M4 10h16M4 15h10M4 20h7";
-    private static final String REPORTS_ICON = "M4 20V10M10 20V4M16 20v-7M22 20H2";
-
-    private final BorderPane root = new BorderPane();
-
-    public HomePage() {
-        root.setLeft(buildSidebar());
-        root.setCenter(buildContent());
-    }
+    private final ScrollPane view = buildContent();
 
     public Parent getView() {
-        return root;
+        return view;
     }
-
-    // ---------------- Sidebar ----------------
-
-    private VBox buildSidebar() {
-        Label logo = new Label("SB");
-        logo.getStyleClass().add("brand-logo");
-        Label appName = new Label("Sentence Builder");
-        appName.getStyleClass().add("brand-name");
-        appName.setMinWidth(Region.USE_PREF_SIZE); // don't cut the name off with "..."
-        HBox brand = new HBox(10, logo, appName);
-        brand.setAlignment(Pos.CENTER_LEFT);
-        brand.getStyleClass().add("brand");
-
-        // Pushes the database status to the bottom of the sidebar
-        Region spacer = new Region();
-        VBox.setVgrow(spacer, Priority.ALWAYS);
-
-        Region statusDot = new Region();
-        statusDot.getStyleClass().add("status-dot");
-        HBox dbStatus = new HBox(8, statusDot, new Label("MySQL · not connected"));
-        dbStatus.setAlignment(Pos.CENTER_LEFT);
-        dbStatus.getStyleClass().add("db-status");
-
-        VBox sidebar = new VBox(4,
-                brand,
-                navButton("Home", HOME_ICON, true),
-                navButton("Import Files", IMPORT_ICON, false),
-                navButton("Generate", GENERATE_ICON, false),
-                navButton("Batch Generate", BATCH_ICON, false),
-                navButton("Auto-complete", AUTOCOMPLETE_ICON, false),
-                navButton("Word Explorer", WORDS_ICON, false),
-                navButton("Reports", REPORTS_ICON, false),
-                spacer,
-                dbStatus);
-        sidebar.getStyleClass().add("sidebar");
-        sidebar.setPrefWidth(240);
-        sidebar.setMinWidth(240);
-        return sidebar;
-    }
-
-    private Button navButton(String text, String icon, boolean active) {
-        SVGPath iconShape = new SVGPath();
-        iconShape.setContent(icon);
-        iconShape.getStyleClass().add("nav-icon");
-
-        Button button = new Button(text, iconShape);
-        button.getStyleClass().add("nav-button");
-        if (active) {
-            button.getStyleClass().add("active");
-        }
-        button.setMaxWidth(Double.MAX_VALUE);
-        // TODO: open this page once it's built
-        return button;
-    }
-
-    // ---------------- Main content ----------------
 
     private ScrollPane buildContent() {
         VBox page = new VBox(24, header(), statTiles(), new HBox(24, quickActions(), recentImports()), recentSentences());

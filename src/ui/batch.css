@@ -1,0 +1,26 @@
+/* Batch Generate page */
+
+.select-all { -fx-font-weight: bold; }
+
+.batch-top { -fx-padding: 18 20 18 20; }
+.batch-row {
+    -fx-padding: 0 20 0 20;
+    -fx-min-height: 55;
+    -fx-border-color: #EEF0F3 transparent transparent transparent;
+}
+.batch-row.duplicate { -fx-background-color: #FFF4EE; }
+
+.word-chip {
+    -fx-background-color: #EEF0F3;
+    -fx-background-radius: 12;
+    -fx-padding: 3 10 3 10;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1B1F24;
+}
+
+.batch-footer {
+    -fx-padding: 16 20 16 20;
+    -fx-border-color: #DDE1E6 transparent transparent transparent;
+}
+.button:disabled { -fx-opacity: 0.5; }
