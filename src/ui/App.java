@@ -25,6 +25,7 @@ public class App extends Application {
     public void start(Stage stage) {
         pages.put(Sidebar.HOME, () -> new HomePage().getView());
         pages.put(Sidebar.IMPORT, () -> new ImportPage().getView());
+        pages.put(Sidebar.GENERATE, () -> new GeneratePage().getView());
 
         root.setLeft(sidebar.getView());
         show(Sidebar.HOME);
