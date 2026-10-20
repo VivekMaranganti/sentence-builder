@@ -1,10 +1,12 @@
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Random;
+/*
 /*
 Written by Vivek Maranganti
 Started 10/18/2026
@@ -14,8 +16,20 @@ Prompt: For my capstone project, generate words.csv and bigrams.csv to use as mo
 
 Used AI to learn about .readAllLines()
 Prompt: Should I use a scanner to read the files or is there a simpler built in function?
-*/
 
+Modified by Dev Sheth
+10/19/2026
+Added the weighted random sentence generation algorithm (generateWeighted and
+pickNextWeighted), the wordIds lookup map, and the readRows helper that removes repeated
+file-reading code from loadWords and loadBigrams. Done with AI assistance (Claude).
+Prompts used by Dev Sheth:
+1. "I'm working on the sentence generation algorithms for our Sentence Builder project. What
+   are some good algorithm ideas for generating sentences from word and bigram counts, and
+   what would a week-by-week plan for researching and building them look like?"
+2. "Here is our current sentence generation code. What are some ways a new algorithm can work
+   cleanly with our word and bigram data (and the database schema later), and how can I
+   organize the existing code without adding extra files?"
+*/
 public class SentenceGenerator {
 
     //Mapping of ID's to the words and counts
@@ -24,8 +38,13 @@ public class SentenceGenerator {
     private Map<Integer, Integer> startCounts = new HashMap<>();
     private Map<Integer, Integer> endCounts = new HashMap<>();
 
+    //Lets us look up a word's ID from the seed word the user types (lowercase)
+    private Map<String, Integer> wordIds = new HashMap<>();
+
     //Which word comes after what
     private Map<Integer, Map<Integer, Integer>> bigrams = new HashMap<>();
+
+    private Random rng = new Random();
 
     public SentenceGenerator(String dataDir) throws IOException {
         //The methods called in this will be modified when the real database starts getting populated.
@@ -34,13 +53,22 @@ public class SentenceGenerator {
         loadBigrams(Path.of(dataDir, "bigrams.csv"));
     }
 
-    private void loadWords(Path file) throws IOException {
-        //Splits each file into words
+    //Reads a CSV file, skips the header row, and splits each remaining line into columns.
+    //Both loaders used to repeat this code, so it now lives in one place.
+    private List<String[]> readRows(Path file) throws IOException {
         List<String> lines = Files.readAllLines(file);
+        List<String[]> rows = new ArrayList<>();
         for (int i = 1; i < lines.size(); i++) {
-            String[] parts = lines.get(i).split(",");
+            rows.add(lines.get(i).split(","));
+        }
+        return rows;
+    }
+
+    private void loadWords(Path file) throws IOException {
+        for (String[] parts : readRows(file)) {
             int id = Integer.parseInt(parts[0]);
             words.put(id, parts[1]);
+            wordIds.put(parts[1].toLowerCase(), id);
 
             //Gets the frequencies of each word, including how often a word starts/ends a sentence
             counts.put(id, Integer.parseInt(parts[2]));
@@ -50,10 +78,7 @@ public class SentenceGenerator {
     }
 
     private void loadBigrams(Path file) throws IOException {
-        //Splits file into words
-        List<String> lines = Files.readAllLines(file);
-        for (int i = 1; i < lines.size(); i++) {
-            String[] parts = lines.get(i).split(",");
+        for (String[] parts : readRows(file)) {
             int first = Integer.parseInt(parts[1]);
             int second = Integer.parseInt(parts[2]);
             int count = Integer.parseInt(parts[5]);
@@ -66,11 +91,58 @@ public class SentenceGenerator {
         }
     }
 
+    //Algorithm 1: Weighted random.
+    //Starts at the seed word and repeatedly picks the next word with probability
+    //proportional to how often it followed the current word. Rare followers still
+    //show up occasionally. Stops at maxLen words or when a word has no followers.
+    public String generateWeighted(String seedWord, int maxLen) {
+        Integer current = wordIds.get(seedWord.toLowerCase());
+        if (current == null) {
+            throw new IllegalArgumentException("Unknown word: " + seedWord);
+        }
+
+        List<String> sentence = new ArrayList<>();
+        while (current != null && sentence.size() < maxLen) {
+            sentence.add(words.get(current));
+            current = pickNextWeighted(current);
+        }
+        return String.join(" ", sentence);
+    }
+
+    //Picks one follower of currentId, weighted by its bigram count. Returns null if it has no followers.
+    private Integer pickNextWeighted(int currentId) {
+        Map<Integer, Integer> followers = bigrams.get(currentId);
+        if (followers == null || followers.isEmpty()) {
+            return null;
+        }
+
+        int total = 0;
+        for (int count : followers.values()) {
+            total += count;
+        }
+
+        //Pick a number from 0 to total-1, then walk through the followers
+        //until the running sum passes it.
+        int target = rng.nextInt(total);
+        int running = 0;
+        for (Map.Entry<Integer, Integer> e : followers.entrySet()) {
+            running += e.getValue();
+            if (target < running) {
+                return e.getKey();
+            }
+        }
+        return null; //not reachable as long as counts are positive
+    }
+
     public static void main(String[] args) throws IOException {
         //Output for testing
         SentenceGenerator gen = new SentenceGenerator("data/mock");
         System.out.println("Words: " + gen.words.size());
         System.out.println("Words with followers: " + gen.bigrams.size());
         System.out.println("After 'the': " + gen.bigrams.get(1));
+
+        for (int i = 0; i < 3; i++) {
+            System.out.println("Weighted: " + gen.generateWeighted("the", 12));
+        }
     }
 }
