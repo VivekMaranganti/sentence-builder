@@ -26,6 +26,7 @@ public class App extends Application {
         pages.put(Sidebar.HOME, () -> new HomePage().getView());
         pages.put(Sidebar.IMPORT, () -> new ImportPage().getView());
         pages.put(Sidebar.GENERATE, () -> new GeneratePage().getView());
+        pages.put(Sidebar.BATCH, () -> new BatchPage().getView());
 
         root.setLeft(sidebar.getView());
         show(Sidebar.HOME);
