@@ -115,3 +115,49 @@
     -fx-padding: 0 0 0 10;
 }
 .list-view { -fx-background-color: white; -fx-background-insets: 0; -fx-border-color: transparent; -fx-padding: 0; }
+
+/* ---------- Form controls ---------- */
+.text-field, .combo-box-base {
+    -fx-background-color: white;
+    -fx-background-insets: 0;
+    -fx-background-radius: 8;
+    -fx-border-color: #C3CAD3;
+    -fx-border-radius: 8;
+    -fx-pref-height: 44;
+    -fx-padding: 0 12 0 12;
+    -fx-text-fill: #1B1F24;
+}
+.text-field:focused, .combo-box-base:focused { -fx-border-color: #2B5BA8; }
+.combo-box-base { -fx-padding: 0 4 0 4; }
+.combo-box .list-cell { -fx-padding: 0 0 0 8; -fx-text-fill: #1B1F24; }
+
+.check-box { -fx-text-fill: #1B1F24; -fx-label-padding: 0 0 0 8; }
+.check-box .box {
+    -fx-background-color: white;
+    -fx-background-insets: 0;
+    -fx-background-radius: 4;
+    -fx-border-color: #8B95A1;
+    -fx-border-radius: 4;
+    -fx-padding: 4;
+}
+.check-box:selected .box { -fx-background-color: #2B5BA8; -fx-border-color: #2B5BA8; }
+.check-box:selected .mark { -fx-background-color: white; }
+
+.progress-bar > .track {
+    -fx-background-color: #E3E7EC;
+    -fx-background-insets: 0;
+    -fx-background-radius: 5;
+}
+.progress-bar > .bar {
+    -fx-background-color: #2B5BA8;
+    -fx-background-insets: 0;
+    -fx-background-radius: 5;
+    -fx-padding: 5;
+}
+
+/* ---------- Tags ---------- */
+.pill { -fx-font-size: 11px; -fx-font-weight: bold; -fx-padding: 3 9 3 9; -fx-background-radius: 10; }
+.pill.blue { -fx-background-color: #E3EAF6; -fx-text-fill: #1E4380; }
+.pill.green { -fx-background-color: #E1F1E7; -fx-text-fill: #1F6B3A; }
+.pill.orange { -fx-background-color: #FBE7DC; -fx-text-fill: #A03A12; }
+.mono { -fx-font-family: "Menlo", monospace; }
