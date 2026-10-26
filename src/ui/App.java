@@ -27,6 +27,7 @@ public class App extends Application {
         pages.put(Sidebar.IMPORT, () -> new ImportPage().getView());
         pages.put(Sidebar.GENERATE, () -> new GeneratePage().getView());
         pages.put(Sidebar.BATCH, () -> new BatchPage().getView());
+        pages.put(Sidebar.AUTOCOMPLETE, () -> new AutoCompletePage().getView());
         pages.put(Sidebar.WORDS, () -> new WordExplorerPage().getView());
         pages.put(Sidebar.REPORTS, () -> new ReportsPage().getView());
 
