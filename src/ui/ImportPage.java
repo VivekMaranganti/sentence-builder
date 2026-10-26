@@ -38,7 +38,7 @@ public class ImportPage {
                 Widgets.header("Import Text Files", "Read a plain .txt file, split it into words, and add the counts to the database."),
                 new HBox(24, pickFilesCard(), importingNowCard()),
                 historyCard());
-        view.getStylesheets().add(new File("src/ui/import.css").toURI().toString());
+        view.getStylesheets().add(new File("src/ui/css/import.css").toURI().toString());
     }
 
     public Parent getView() {

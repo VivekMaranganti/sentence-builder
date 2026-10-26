@@ -38,7 +38,7 @@ public class BatchPage {
                 Widgets.header("Batch Generate", "Make several sentences from random starting words, then feed the ones you keep back into the database."),
                 settingsCard(),
                 resultsCard());
-        view.getStylesheets().add(new File("src/ui/batch.css").toURI().toString());
+        view.getStylesheets().add(new File("src/ui/css/batch.css").toURI().toString());
         updateSummary();
     }
 

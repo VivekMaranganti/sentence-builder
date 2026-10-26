@@ -32,7 +32,7 @@ public class GeneratePage {
         view = Widgets.page(
                 Widgets.header("Generate Sentence", "Pick a starting word and an algorithm. The program chooses each next word from the database."),
                 new HBox(24, optionsCard(), right));
-        view.getStylesheets().add(new File("src/ui/generate.css").toURI().toString());
+        view.getStylesheets().add(new File("src/ui/css/generate.css").toURI().toString());
     }
 
     public Parent getView() {

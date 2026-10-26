@@ -1,0 +1,14 @@
+/* Reports page */
+.reports-page .tab-pane > .tab-header-area { -fx-padding: 0; }
+.reports-page .tab-pane > .tab-header-area > .tab-header-background { -fx-background-color: transparent; -fx-border-color: transparent transparent #DDE1E6 transparent; }
+.reports-page .tab { -fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 12 18; -fx-border-color: transparent; -fx-border-width: 0 0 3 0; }
+.reports-page .tab:selected { -fx-border-color: #2B5BA8; }
+.reports-page .tab .tab-label { -fx-text-fill: #4A5360; -fx-font-weight: bold; }
+.reports-page .tab:selected .tab-label { -fx-text-fill: #2B5BA8; }
+.reports-page .tab .focus-indicator { -fx-border-color: transparent; }
+.report-content { -fx-padding: 24 0 0 0; }
+.reports-page .duplicate-total { -fx-text-fill: #A03A12; }
+.reports-page .table-row-cell { -fx-background-color: white; -fx-border-color: transparent transparent #EEF0F3 transparent; }
+.reports-page .table-row-cell:selected { -fx-background-color: #EAF0FA; }
+.reports-page .table-cell { -fx-alignment: center-left; -fx-padding: 0 10; -fx-text-fill: #1B1F24; -fx-border-color: transparent; -fx-font-size: 12px; }
+.reports-page .progress-bar > .bar { -fx-padding: 4; }

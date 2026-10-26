@@ -6,7 +6,7 @@ The UI is a JavaFX desktop app. There is no Maven/Gradle build, so you run it wi
 
 1. Install Java 17 or newer.
 2. Download the JavaFX SDK from [gluonhq.com/products/javafx](https://gluonhq.com/products/javafx/) and unzip it (e.g. to `~/javafx-sdk`).
-3. From the repo root (the app loads `src/ui/styles.css` by relative path), run:
+3. From the repo root (the app loads `src/ui/css/styles.css` by relative path), run:
 
 ```bash
 ./run-ui.sh

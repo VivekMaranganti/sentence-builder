@@ -23,10 +23,12 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
-        pages.put(Sidebar.HOME, () -> new HomePage().getView());
+        pages.put(Sidebar.HOME, () -> new HomePage(this::show).getView());
         pages.put(Sidebar.IMPORT, () -> new ImportPage().getView());
         pages.put(Sidebar.GENERATE, () -> new GeneratePage().getView());
         pages.put(Sidebar.BATCH, () -> new BatchPage().getView());
+        pages.put(Sidebar.WORDS, () -> new WordExplorerPage().getView());
+        pages.put(Sidebar.REPORTS, () -> new ReportsPage().getView());
 
         root.setLeft(sidebar.getView());
         show(Sidebar.HOME);
@@ -34,7 +36,7 @@ public class App extends Application {
         Scene scene = new Scene(root, 1280, 820);
 
         // Load the styles. This path works when you run from the project root folder.
-        scene.getStylesheets().add(new File("src/ui/styles.css").toURI().toString());
+        scene.getStylesheets().add(new File("src/ui/css/styles.css").toURI().toString());
 
         stage.setTitle("Sentence Builder");
         stage.setScene(scene);
