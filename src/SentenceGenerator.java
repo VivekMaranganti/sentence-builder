@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 /*
-/*
+
 Written by Vivek Maranganti
 Started 10/18/2026
 
@@ -21,7 +21,7 @@ Modified by Dev Sheth
 10/19/2026
 Added the weighted random sentence generation algorithm (generateWeighted and
 pickNextWeighted), the wordIds lookup map, and the readRows helper that removes repeated
-file-reading code from loadWords and loadBigrams. Done with AI assistance (Claude).
+file-reading code from loadWords and loadBigrams.
 Prompts used by Dev Sheth:
 1. "I'm working on the sentence generation algorithms for our Sentence Builder project. What
    are some good algorithm ideas for generating sentences from word and bigram counts, and
@@ -64,6 +64,8 @@ public class SentenceGenerator {
         return rows;
     }
 
+    //Vivek Maranganti, 10/18/2026.
+    //Prompt: "ok lets work on sentence generation with mock files to mimic the final database, headlessly"
     private void loadWords(Path file) throws IOException {
         for (String[] parts : readRows(file)) {
             int id = Integer.parseInt(parts[0]);
@@ -77,6 +79,8 @@ public class SentenceGenerator {
         }
     }
 
+    //Vivek Maranganti, 10/18/2026.
+    //Prompt: "ok lets work on sentence generation with mock files to mimic the final database, headlessly"
     private void loadBigrams(Path file) throws IOException {
         for (String[] parts : readRows(file)) {
             int first = Integer.parseInt(parts[1]);
@@ -134,6 +138,117 @@ public class SentenceGenerator {
         return null; //not reachable as long as counts are positive
     }
 
+    //Written by Vivek Maranganti and Dev Sheth, 11/03/2026.
+    //Prompt: "okay, lets also do the second generation algorithm. Show me some suggestions"
+    public String generateMostFrequent(String seedWord, int maxLen) {
+        Integer current = wordIds.get(seedWord.toLowerCase());
+        if (current == null) {
+            throw new IllegalArgumentException("Unknown word: " + seedWord);
+        }
+
+        List<String> sentence = new ArrayList<>();
+        List<Integer> used = new ArrayList<>();
+        while (current != null && sentence.size() < maxLen) {
+            sentence.add(words.get(current));
+            used.add(current);
+            current = pickMostFrequent(current, used);
+        }
+        return String.join(" ", sentence);
+    }
+
+    //Written by Vivek Maranganti and Dev Sheth, 11/03/2026.
+    //Prompt: "okay, lets also do the second generation algorithm. Show me some suggestions"
+    private Integer pickMostFrequent(int currentId, List<Integer> used) {
+        Map<Integer, Integer> followers = bigrams.get(currentId);
+        if (followers == null) {
+            return null;
+        }
+        Integer bestId = null;
+        int bestCount = 0;
+        for (int followerId : followers.keySet()) {
+            if (!used.contains(followerId) && followers.get(followerId) > bestCount) {
+                bestId = followerId;
+                bestCount = followers.get(followerId);
+            }
+        }
+        return bestId;
+    }
+
+    //Vivek Maranganti, 10/27/2026.
+    //Prompt: "ok now lets work on the auto-complete feature."
+    //Prompt: "why though. Autocomplete processes every word thats being typed, and adding unseen words to the database are also processing every word thatts being typed. Cant this be done in the same function?"
+    public List<String> autoComplete(String word) {
+        List<String> suggestions = new ArrayList<>();
+
+        Integer id = wordIds.get(word.toLowerCase());
+        if (id == null || !bigrams.containsKey(id)) {
+            return suggestions;
+        }
+
+        Map<Integer, Integer> followers = new HashMap<>(bigrams.get(id));
+
+        for (int i = 0; i < 5 && !followers.isEmpty(); i++) {
+            int bestId = -1;
+            int bestCount = -1;
+            for (int followerId : followers.keySet()) {
+                if (followers.get(followerId) > bestCount) {
+                    bestCount = followers.get(followerId);
+                    bestId = followerId;
+                }
+            }
+            suggestions.add(words.get(bestId));
+            followers.remove(bestId);
+        }
+        return suggestions;
+    }
+
+    /*
+    Written by Vivek Maranganti and Dev Sheth, 11/03/2026.
+    Prompt: "I looked into some sentence generation examples, and I like beam search. Lets start with
+    a seed, get every possible follower, sort them, keep the best ones. The number you keep should be
+    the beam size. Then, we can repeat this process until the sentence is finished. What do you think?"
+    */
+    private static class Candidate {
+        List<Integer> ids = new ArrayList<>();
+        double score = 1.0;
+        boolean finished = false;
+
+        Candidate(int firstWordId) {
+            ids.add(firstWordId);
+        }
+
+        Candidate(Candidate old, int nextWordId, double pairProbability) {
+            ids.addAll(old.ids);
+            ids.add(nextWordId);
+            score = old.score * pairProbability;
+        }
+    }
+
+    /*
+    Written by Vivek Maranganti and Dev Sheth, 11/03/2026.
+    Prompt: "I looked into some sentence generation examples, and I like beam search. Lets start with
+    a seed, get every possible follower, sort them, keep the best ones. The number you keep should be
+    the beam size. Then, we can repeat this process until the sentence is finished. What do you think?"
+    */
+    private List<Candidate> expand(Candidate old) {
+        List<Candidate> results = new ArrayList<>();
+        int lastId = old.ids.get(old.ids.size() - 1);
+        Map<Integer, Integer> followers = bigrams.get(lastId);
+        if (followers == null || followers.isEmpty()) {
+            return results;
+        }
+
+        int total = 0;
+        for (int count : followers.values()) {
+            total += count;
+        }
+        for (Map.Entry<Integer, Integer> e : followers.entrySet()) {
+            double probability = (double) e.getValue() / total;
+            results.add(new Candidate(old, e.getKey(), probability));
+        }
+        return results;
+    }
+
     public static void main(String[] args) throws IOException {
         //Output for testing
         SentenceGenerator gen = new SentenceGenerator("data/mock");
@@ -144,5 +259,19 @@ public class SentenceGenerator {
         for (int i = 0; i < 3; i++) {
             System.out.println("Weighted: " + gen.generateWeighted("the", 12));
         }
+        System.out.println("Most frequent: " + gen.generateMostFrequent("the", 12));
+        System.out.println("Most frequent: " + gen.generateMostFrequent("dog", 12));
+        System.out.println("Autocomplete after 'the': " + gen.autoComplete("the"));
+
+        Candidate seed = new Candidate(gen.wordIds.get("the"));
+        List<Candidate> next = gen.expand(seed);
+        System.out.println("Extensions of 'the': " + next.size());
+        Candidate best = next.get(0);
+        for (Candidate c : next) {
+            if (c.score > best.score) {
+                best = c;
+            }
+        }
+        System.out.println("Best: " + gen.words.get(best.ids.get(1)) + " " + best.score);
     }
 }
