@@ -1,1 +1,30 @@
+# IntelliJ local workspace files
+.idea/
+*.iml
 out/
+
+# Maven build output
+target/
+
+# Java compiled files
+*.class
+
+# Local environment variables and secrets
+.env
+.env.*
+!.env.example
+*.properties.local
+application-local.properties
+
+# Local database files and backups
+*.sqlite
+*.sqlite3
+*.db
+*.sql.gz
+*.sql.bak
+
+# OS files
+.DS_Store
+Thumbs.db
+out/
+out-test/
