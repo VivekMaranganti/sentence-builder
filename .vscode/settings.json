@@ -1,0 +1,4 @@
+{
+    "jdk.runConfig.vmOptions": "--module-path /Users/antony/javafx-sdk-21/lib --add-modules javafx.controls",
+    "jdk.runConfig.cwd": "${workspaceFolder}"
+}

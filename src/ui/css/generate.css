@@ -1,0 +1,35 @@
+/* Generate page */
+
+.choice {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-color: #DDE1E6;
+    -fx-border-radius: 8;
+    -fx-padding: 12 14 12 14;
+    -fx-cursor: hand;
+}
+.choice.selected { -fx-background-color: #EEF3FB; -fx-border-color: #2B5BA8; }
+.choice-title { -fx-font-weight: bold; -fx-text-fill: #1B1F24; }
+.choice-description { -fx-font-size: 13px; -fx-text-fill: #4A5360; -fx-padding: 0 0 0 26; }
+
+.radio-button .radio {
+    -fx-background-color: white;
+    -fx-background-insets: 0;
+    -fx-background-radius: 10;
+    -fx-border-color: #8B95A1;
+    -fx-border-radius: 10;
+}
+.radio-button:selected .radio { -fx-border-color: #2B5BA8; }
+.radio-button .dot { -fx-background-color: transparent; }
+.radio-button:selected .dot { -fx-background-color: #2B5BA8; }
+.radio-button { -fx-label-padding: 0 0 0 10; }
+
+.result-sentence { -fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #1B1F24; }
+
+.chip { -fx-background-color: #F1F3F6; -fx-background-radius: 8; -fx-padding: 8 12 8 12; }
+.chip-word { -fx-font-size: 14px; -fx-text-fill: #1B1F24; }
+.chip-chance { -fx-font-size: 12px; -fx-text-fill: #4A5360; }
+.chip.unlikely { -fx-background-color: #FCE9DD; }
+.chip.unlikely .chip-chance { -fx-text-fill: #A03A12; }
+
+.session-row { -fx-padding: 10 0 10 0; -fx-border-color: #EEF0F3 transparent transparent transparent; }
