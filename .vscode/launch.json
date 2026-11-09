@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "jdk",
+            "name": "Sentence Builder",
+            "request": "launch",
+            "mainClass": "ui.App",
+            "cwd": "${workspaceFolder}",
+            "vmArgs": "--module-path /Users/antony/javafx-sdk-21/lib --add-modules javafx.controls"
+        }
+    ]
+}

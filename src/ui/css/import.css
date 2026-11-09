@@ -1,0 +1,25 @@
+/* Import page */
+
+.drop-zone {
+    -fx-background-color: #FAFBFC;
+    -fx-background-radius: 10;
+    -fx-border-color: #A9B3BF;
+    -fx-border-style: dashed;
+    -fx-border-radius: 10;
+    -fx-padding: 28 20 28 20;
+}
+.drop-icon {
+    -fx-fill: transparent;
+    -fx-stroke: #2B5BA8;
+    -fx-stroke-width: 2;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+}
+
+.percent { -fx-font-weight: bold; -fx-text-fill: #1B1F24; }
+.count { -fx-font-weight: bold; -fx-text-fill: #1B1F24; }
+
+.table-row-cell { -fx-background-color: white; -fx-border-color: transparent transparent #EEF0F3 transparent; }
+.table-row-cell:selected { -fx-background-color: #EAF0FA; }
+.table-cell { -fx-alignment: center-left; -fx-padding: 0 0 0 10; -fx-text-fill: #1B1F24; -fx-border-color: transparent; }
+.table-cell.mono { -fx-font-size: 13px; }

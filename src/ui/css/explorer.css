@@ -1,0 +1,5 @@
+/* Word Explorer page */
+.word-explorer .table-row-cell { -fx-background-color: white; -fx-border-color: transparent transparent #EEF0F3 transparent; }
+.word-explorer .table-row-cell:selected { -fx-background-color: #E3EAF6; }
+.word-explorer .table-cell { -fx-alignment: center-left; -fx-padding: 0 10; -fx-text-fill: #1B1F24; -fx-border-color: transparent; -fx-font-size: 13px; }
+.word-explorer .progress-bar > .bar { -fx-padding: 4; }
