@@ -177,10 +177,41 @@ public class SentenceGenerator {
     //Vivek Maranganti, 10/27/2026.
     //Prompt: "ok now lets work on the auto-complete feature."
     //Prompt: "why though. Autocomplete processes every word thats being typed, and adding unseen words to the database are also processing every word thatts being typed. Cant this be done in the same function?"
-    public List<String> autoComplete(String word) {
+    //Prompt: "Yes, lets have it done in the same function, but it shouldn't happen automatically, because there may be typos"
+    public List<String> autoComplete(String previousWord, String typedWord, boolean confirmed) {
         List<String> suggestions = new ArrayList<>();
+        String typed = typedWord.toLowerCase();
+        Integer id = wordIds.get(typed);
 
-        Integer id = wordIds.get(word.toLowerCase());
+        if (confirmed) {
+            if (id == null) {
+                id = words.size() + 1;
+                words.put(id, typed);
+                wordIds.put(typed, id);
+                counts.put(id, 0);
+                startCounts.put(id, 0);
+                endCounts.put(id, 0);
+            }
+            counts.put(id, counts.get(id) + 1);
+
+            if (previousWord == null) {
+                startCounts.put(id, startCounts.get(id) + 1);
+            } else {
+                Integer previousId = wordIds.get(previousWord.toLowerCase());
+                if (previousId != null) {
+                    if (!bigrams.containsKey(previousId)) {
+                        bigrams.put(previousId, new HashMap<>());
+                    }
+                    Map<Integer, Integer> pairs = bigrams.get(previousId);
+                    if (pairs.containsKey(id)) {
+                        pairs.put(id, pairs.get(id) + 1);
+                    } else {
+                        pairs.put(id, 1);
+                    }
+                }
+            }
+        }
+
         if (id == null || !bigrams.containsKey(id)) {
             return suggestions;
         }
@@ -261,7 +292,7 @@ public class SentenceGenerator {
         }
         System.out.println("Most frequent: " + gen.generateMostFrequent("the", 12));
         System.out.println("Most frequent: " + gen.generateMostFrequent("dog", 12));
-        System.out.println("Autocomplete after 'the': " + gen.autoComplete("the"));
+        System.out.println("Autocomplete after 'the': " + gen.autoComplete(null, "the", false));
 
         Candidate seed = new Candidate(gen.wordIds.get("the"));
         List<Candidate> next = gen.expand(seed);
