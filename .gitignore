@@ -28,3 +28,6 @@ application-local.properties
 Thumbs.db
 out/
 out-test/
+
+lib/
+out/

@@ -25,6 +25,28 @@ javac --module-path ~/javafx-sdk/lib --add-modules javafx.controls -d out src/ui
 java --module-path ~/javafx-sdk/lib --add-modules javafx.controls -cp out ui.App
 ```
 
+### Database setup
+
+The app talks to a local MySQL server, so before running it:
+
+1. Install MySQL Server and run the schema script to create the `sentence_builder` database.
+2. Download MySQL Connector/J (platform independent zip) from dev.mysql.com and copy the `.jar` into a `lib/` folder at the repo root. Do not commit it.
+3. Set your MySQL root password in the terminal before launching. Never put it in the code.
+
+```bash
+export DB_PASSWORD=your_password
+```
+
+**Windows (PowerShell):** `run-ui.sh` uses `:` in the classpath, which only works on Mac and Linux. On Windows, run:
+
+```powershell
+$env:DB_PASSWORD = "your_password"
+javac --module-path $FX --add-modules javafx.controls -cp $JDBC -d out src\backend\*.java src\ui\*.java
+java --module-path $FX --add-modules javafx.controls -cp "out;$JDBC" ui.App
+```
+
+where `$FX` is your JavaFX `lib` folder and `$JDBC` is the path to the connector jar.
+
 ## Running the tests
 
 The UI tests use JUnit 5 and the same JavaFX SDK as above.
