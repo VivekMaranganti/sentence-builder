@@ -8,6 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /*
 
@@ -57,6 +61,12 @@ public class SentenceGenerator {
         loadBigrams(Path.of(dataDir, "bigrams.csv"));
     }
 
+    // Loads the same maps from MySQL instead of the mock CSVs.
+    public SentenceGenerator(Connection conn) throws SQLException {
+        loadWordsFromDb(conn);
+        loadBigramsFromDb(conn);
+    }
+
     // Reads a CSV file, skips the header row, and splits each remaining line into
     // columns.
     // Both loaders used to repeat this code, so it now lives in one place.
@@ -101,6 +111,33 @@ public class SentenceGenerator {
                 bigrams.put(first, new HashMap<>());
             }
             bigrams.get(first).put(second, count);
+        }
+    }
+
+    private void loadWordsFromDb(Connection conn) throws SQLException {
+        String sql = "SELECT word_id, word_text, frequency, start_count, end_count FROM words";
+        try (Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                int id = rs.getInt("word_id");
+                String text = rs.getString("word_text");
+                words.put(id, text);
+                wordIds.put(text.toLowerCase(), id);
+                counts.put(id, rs.getInt("frequency"));
+                startCounts.put(id, rs.getInt("start_count"));
+                endCounts.put(id, rs.getInt("end_count"));
+            }
+        }
+    }
+
+    private void loadBigramsFromDb(Connection conn) throws SQLException {
+        String sql = "SELECT previous_word_id, next_word_id, transition_count FROM word_transitions";
+        try (Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                bigrams.computeIfAbsent(rs.getInt("previous_word_id"), k -> new HashMap<>())
+                        .put(rs.getInt("next_word_id"), rs.getInt("transition_count"));
+            }
         }
     }
 
@@ -301,7 +338,7 @@ public class SentenceGenerator {
         return results;
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         // Output for testing
         SentenceGenerator gen = new SentenceGenerator("data/mock");
         System.out.println("Words: " + gen.words.size());
@@ -325,5 +362,10 @@ public class SentenceGenerator {
             }
         }
         System.out.println("Best: " + gen.words.get(best.ids.get(1)) + " " + best.score);
+        try (Connection conn = DatabaseManager.getConnection()) {
+            SentenceGenerator dbGen = new SentenceGenerator(conn);
+            System.out.println("DB words: " + dbGen.words.size());
+            System.out.println("DB weighted: " + dbGen.generateWeighted("the", 12));
+        }
     }
 }
