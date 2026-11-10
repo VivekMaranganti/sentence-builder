@@ -1,3 +1,5 @@
+package backend;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -27,7 +29,8 @@ public class FileImporter {
 
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
-                if (line.isEmpty()) continue;
+                if (line.isEmpty())
+                    continue;
 
                 // Split line into words using whitespace while keeping punctuation structure
                 String[] rawTokens = line.split("\\s+");
@@ -35,9 +38,11 @@ public class FileImporter {
                 for (int i = 0; i < rawTokens.length; i++) {
                     String token = rawTokens[i];
 
-                    // Clean word: keep letters, apostrophes, and hyphens (strips leading/trailing punctuation)
+                    // Clean word: keep letters, apostrophes, and hyphens (strips leading/trailing
+                    // punctuation)
                     String cleanedWord = token.replaceAll("^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$", "");
-                    if (cleanedWord.isEmpty()) continue;
+                    if (cleanedWord.isEmpty())
+                        continue;
 
                     totalWordCount++;
 

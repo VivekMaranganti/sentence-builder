@@ -1,3 +1,5 @@
+package backend;
+
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,9 +18,17 @@ public class WordDAO {
             this.endCount = endCount;
         }
 
-        public int getFrequency() { return frequency; }
-        public int getStartCount() { return startCount; }
-        public int getEndCount() { return endCount; }
+        public int getFrequency() {
+            return frequency;
+        }
+
+        public int getStartCount() {
+            return startCount;
+        }
+
+        public int getEndCount() {
+            return endCount;
+        }
     }
 
     // Function 1: Batch Insert / Update Words
@@ -106,7 +116,7 @@ public class WordDAO {
         String sql = "SELECT word_id, word_text FROM words";
 
         try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+                ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 wordMap.put(rs.getString("word_text"), rs.getInt("word_id"));
             }
