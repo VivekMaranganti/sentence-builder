@@ -114,6 +114,9 @@ public class SentenceGenerator {
         }
     }
 
+    // Written by Dev Sheth, 11/10/2026, with AI assistance (Claude).
+    // Prompt was "Now help me to work on sentence generation with mock files to
+    // mimic the final database, headlessly"
     private void loadWordsFromDb(Connection conn) throws SQLException {
         String sql = "SELECT word_id, word_text, frequency, start_count, end_count FROM words";
         try (Statement stmt = conn.createStatement();
@@ -130,6 +133,9 @@ public class SentenceGenerator {
         }
     }
 
+    // Written by Dev Sheth, 11/10/2026, with AI assistance (Claude).
+    // Prompt was "Now help me to work on sentence generation with mock files to
+    // mimic the final database, headlessly"
     private void loadBigramsFromDb(Connection conn) throws SQLException {
         String sql = "SELECT previous_word_id, next_word_id, transition_count FROM word_transitions";
         try (Statement stmt = conn.createStatement();
