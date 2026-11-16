@@ -17,7 +17,8 @@ import java.util.function.Consumer;
 /** The dark navigation sidebar shown on every page. */
 public class Sidebar {
 
-    // Page names. These are the button labels and also the keys App uses to find each page.
+    // Page names. These are the button labels and also the keys App uses to find
+    // each page.
     public static final String HOME = "Home";
     public static final String IMPORT = "Import Files";
     public static final String GENERATE = "Generate";
@@ -37,6 +38,7 @@ public class Sidebar {
 
     private final Map<String, Button> buttons = new LinkedHashMap<>();
     private final VBox view;
+    private final Label dbStatusLabel = new Label("MySQL · not connected");
 
     /** @param onNavigate called with the page name when a nav button is clicked */
     public Sidebar(Consumer<String> onNavigate) {
@@ -64,7 +66,7 @@ public class Sidebar {
 
         Region statusDot = new Region();
         statusDot.getStyleClass().add("status-dot");
-        HBox dbStatus = new HBox(8, statusDot, new Label("MySQL · not connected"));
+        HBox dbStatus = new HBox(8, statusDot, dbStatusLabel);
         dbStatus.setAlignment(Pos.CENTER_LEFT);
         dbStatus.getStyleClass().add("db-status");
 
@@ -86,6 +88,11 @@ public class Sidebar {
                 button.getStyleClass().add("active");
             }
         });
+    }
+
+    /** Updates the status text at the bottom of the sidebar. */
+    public void setConnected(boolean connected) {
+        dbStatusLabel.setText(connected ? "MySQL · connected" : "MySQL · not connected");
     }
 
     private void addNavButton(String text, String icon, Consumer<String> onNavigate) {

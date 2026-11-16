@@ -1,5 +1,8 @@
 package ui;
 
+import backend.AppService;
+import javafx.concurrent.Task;
+
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
@@ -15,17 +18,63 @@ import javafx.scene.layout.VBox;
 
 import java.util.function.Consumer;
 
+/*
+Home page stat tiles connected to the database by Dev Sheth, 11/10/2026, with AI assistance (Claude).
+*/
 /**
  * The Home page: an overview of the word database.
  */
 public class HomePage {
 
     private final Consumer<String> onNavigate;
+    private final AppService service;
     private final ScrollPane view;
+    // Edited by Dev Sheth: (with help from Claude) 11/10/2026: Added the four
+    // labels so they can be updated when the stats are loaded.
+    private final Label uniqueValue = statValue();
+    private final Label totalValue = statValue();
+    private final Label pairsValue = statValue();
+    private final Label filesValue = statValue();
 
+    /** Keeps the old signature so the existing tests still compile. */
     public HomePage(Consumer<String> onNavigate) {
+        this(onNavigate, null);
+    }
+
+    public HomePage(Consumer<String> onNavigate, AppService service) {
         this.onNavigate = onNavigate;
+        this.service = service;
         view = buildContent();
+        loadStats();
+    }
+
+    private static Label statValue() {
+        Label value = new Label("—");
+        value.getStyleClass().add("stat-value");
+        return value;
+    }
+
+    /** Fills the four tiles from MySQL, off the JavaFX thread. */
+    private void loadStats() {
+        if (service == null) {
+            return;
+        }
+        Task<AppService.Stats> task = new Task<>() {
+            @Override
+            protected AppService.Stats call() throws Exception {
+                return service.getStats();
+            }
+        };
+        task.setOnSucceeded(e -> {
+            AppService.Stats s = task.getValue();
+            uniqueValue.setText(String.format("%,d", s.uniqueWords()));
+            totalValue.setText(String.format("%,d", s.totalWords()));
+            pairsValue.setText(String.format("%,d", s.wordPairs()));
+            filesValue.setText(String.format("%,d", s.files()));
+        });
+        Thread thread = new Thread(task);
+        thread.setDaemon(true);
+        thread.start();
     }
 
     public Parent getView() {
@@ -33,7 +82,8 @@ public class HomePage {
     }
 
     private ScrollPane buildContent() {
-        VBox page = new VBox(24, header(), statTiles(), new HBox(24, quickActions(), recentImports()), recentSentences());
+        VBox page = new VBox(24, header(), statTiles(), new HBox(24, quickActions(), recentImports()),
+                recentSentences());
         page.getStyleClass().add("page");
 
         ScrollPane scroll = new ScrollPane(page);
@@ -61,18 +111,16 @@ public class HomePage {
 
     private HBox statTiles() {
         return new HBox(16,
-                statTile("UNIQUE WORDS"),
-                statTile("TOTAL WORDS READ"),
-                statTile("WORD PAIRS"),
-                statTile("FILES IMPORTED"));
+                statTile("UNIQUE WORDS", uniqueValue),
+                statTile("TOTAL WORDS READ", totalValue),
+                statTile("WORD PAIRS", pairsValue),
+                statTile("FILES IMPORTED", filesValue));
     }
 
-    /** A white card with a label and a number. Shows "—" until real data is connected. */
-    private VBox statTile(String name) {
+    /** A white card with a label and a number. */
+    private VBox statTile(String name, Label value) {
         Label label = new Label(name);
         label.getStyleClass().add("field-label");
-        Label value = new Label("—");
-        value.getStyleClass().add("stat-value");
 
         VBox tile = new VBox(8, label, value);
         tile.getStyleClass().add("card");

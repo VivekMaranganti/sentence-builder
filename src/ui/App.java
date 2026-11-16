@@ -1,5 +1,8 @@
 package ui;
 
+import backend.AppService;
+import javafx.concurrent.Task;
+
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -17,13 +20,16 @@ public class App extends Application {
     private final BorderPane root = new BorderPane();
     private final Sidebar sidebar = new Sidebar(this::show);
 
-    // How to build each page. A page is built the first time it's opened, then reused.
+    private final AppService service = new AppService();
+
+    // How to build each page. A page is built the first time it's opened, then
+    // reused.
     private final Map<String, Supplier<Parent>> pages = new HashMap<>();
     private final Map<String, Parent> openedPages = new HashMap<>();
 
     @Override
     public void start(Stage stage) {
-        pages.put(Sidebar.HOME, () -> new HomePage(this::show).getView());
+        pages.put(Sidebar.HOME, () -> new HomePage(this::show, service).getView());
         pages.put(Sidebar.IMPORT, () -> new ImportPage().getView());
         pages.put(Sidebar.GENERATE, () -> new GeneratePage().getView());
         pages.put(Sidebar.BATCH, () -> new BatchPage().getView());
@@ -42,6 +48,17 @@ public class App extends Application {
         stage.setTitle("Sentence Builder");
         stage.setScene(scene);
         stage.show();
+
+        Task<Boolean> check = new Task<>() {
+            @Override
+            protected Boolean call() {
+                return service.isConnected();
+            }
+        };
+        check.setOnSucceeded(e -> sidebar.setConnected(check.getValue()));
+        Thread thread = new Thread(check);
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private void show(String page) {
