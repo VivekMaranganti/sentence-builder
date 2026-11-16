@@ -344,6 +344,96 @@ public class SentenceGenerator {
         return results;
     }
 
+    // Written by Dev Sheth, 11/16/2026, with AI assistance (Claude).
+    // One word of a generated sentence, with the chance it was picked after the
+    // previous word.
+    // The first word has a chance of 1.0 (the UI shows it as "start").
+    public record Step(String word, double chance) {
+    }
+
+    // Builds a sentence and records the chance of each pick, for the Generate page
+    // chips.
+    // algorithm is "Weighted bigram", "Most frequent", or "Random follower".
+    public List<Step> generateSteps(String algorithm, String seedWord, int maxLen, boolean stopAtEnd) {
+        Integer current = wordIds.get(seedWord.toLowerCase());
+        if (current == null) {
+            throw new IllegalArgumentException("Unknown word: " + seedWord);
+        }
+
+        List<Step> steps = new ArrayList<>();
+        List<Integer> used = new ArrayList<>();
+        double chance = 1.0;
+        while (current != null && steps.size() < maxLen) {
+            steps.add(new Step(words.get(current), chance));
+            used.add(current);
+
+            // Optionally stop on a word that often ends sentences, after at least 3 words
+            if (stopAtEnd && steps.size() >= 3 && endsSentence(current)) {
+                break;
+            }
+
+            Integer next = switch (algorithm) {
+                case "Most frequent" -> pickMostFrequent(current, used);
+                case "Random follower" -> pickRandomFollower(current);
+                default -> pickNextWeighted(current);
+            };
+            if (next == null) {
+                break;
+            }
+            chance = followChance(current, next);
+            current = next;
+        }
+        return steps;
+    }
+
+    // Stops with probability endCount / count, so words that often end sentences
+    // usually do.
+    private boolean endsSentence(int id) {
+        int total = counts.getOrDefault(id, 0);
+        return total > 0 && rng.nextDouble() < (double) endCounts.getOrDefault(id, 0) / total;
+    }
+
+    // Any word that has followed currentId, all equally likely.
+    private Integer pickRandomFollower(int currentId) {
+        Map<Integer, Integer> followers = bigrams.get(currentId);
+        if (followers == null || followers.isEmpty()) {
+            return null;
+        }
+        List<Integer> ids = new ArrayList<>(followers.keySet());
+        return ids.get(rng.nextInt(ids.size()));
+    }
+
+    // Probability that nextId follows currentId, from the bigram counts.
+    private double followChance(int currentId, int nextId) {
+        Map<Integer, Integer> followers = bigrams.get(currentId);
+        int total = 0;
+        for (int count : followers.values()) {
+            total += count;
+        }
+        return (double) followers.get(nextId) / total;
+    }
+
+    // A random word to start a sentence with, weighted by how often words start
+    // sentences.
+    public String randomStartWord() {
+        int total = 0;
+        for (int count : startCounts.values()) {
+            total += count;
+        }
+        if (total == 0) {
+            return null;
+        }
+        int target = rng.nextInt(total);
+        int running = 0;
+        for (Map.Entry<Integer, Integer> e : startCounts.entrySet()) {
+            running += e.getValue();
+            if (target < running) {
+                return words.get(e.getKey());
+            }
+        }
+        return null;
+    }
+
     public static void main(String[] args) throws Exception {
         // Output for testing
         SentenceGenerator gen = new SentenceGenerator("data/mock");
