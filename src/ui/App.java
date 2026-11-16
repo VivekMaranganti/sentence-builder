@@ -1,9 +1,8 @@
 package ui;
 
 import backend.AppService;
-import javafx.concurrent.Task;
-
 import javafx.application.Application;
+import javafx.concurrent.Task;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
@@ -19,7 +18,6 @@ public class App extends Application {
 
     private final BorderPane root = new BorderPane();
     private final Sidebar sidebar = new Sidebar(this::show);
-
     private final AppService service = new AppService();
 
     // How to build each page. A page is built the first time it's opened, then
@@ -31,7 +29,7 @@ public class App extends Application {
     public void start(Stage stage) {
         pages.put(Sidebar.HOME, () -> new HomePage(this::show, service).getView());
         pages.put(Sidebar.IMPORT, () -> new ImportPage().getView());
-        pages.put(Sidebar.GENERATE, () -> new GeneratePage().getView());
+        pages.put(Sidebar.GENERATE, () -> new GeneratePage(service).getView());
         pages.put(Sidebar.BATCH, () -> new BatchPage().getView());
         pages.put(Sidebar.AUTOCOMPLETE, () -> new AutoCompletePage().getView());
         pages.put(Sidebar.WORDS, () -> new WordExplorerPage().getView());
@@ -41,8 +39,6 @@ public class App extends Application {
         show(Sidebar.HOME);
 
         Scene scene = new Scene(root, 1280, 820);
-
-        // Load the styles. This path works when you run from the project root folder.
         scene.getStylesheets().add(new File("src/ui/css/styles.css").toURI().toString());
 
         stage.setTitle("Sentence Builder");
@@ -64,7 +60,7 @@ public class App extends Application {
     private void show(String page) {
         Supplier<Parent> builder = pages.get(page);
         if (builder == null) {
-            return; // this page isn't built yet
+            return;
         }
         sidebar.setActive(page);
         root.setCenter(openedPages.computeIfAbsent(page, name -> builder.get()));
