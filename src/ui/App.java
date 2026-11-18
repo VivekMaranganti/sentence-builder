@@ -19,6 +19,7 @@ public class App extends Application {
     private final BorderPane root = new BorderPane();
     private final Sidebar sidebar = new Sidebar(this::show);
     private final AppService service = new AppService();
+    private HomePage home;
 
     // How to build each page. A page is built the first time it's opened, then
     // reused.
@@ -27,8 +28,11 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) {
-        pages.put(Sidebar.HOME, () -> new HomePage(this::show, service).getView());
-        pages.put(Sidebar.IMPORT, () -> new ImportPage().getView());
+        pages.put(Sidebar.HOME, () -> {
+            home = new HomePage(this::show, service);
+            return home.getView();
+        });
+        pages.put(Sidebar.IMPORT, () -> new ImportPage(service).getView());
         pages.put(Sidebar.GENERATE, () -> new GeneratePage(service).getView());
         pages.put(Sidebar.BATCH, () -> new BatchPage().getView());
         pages.put(Sidebar.AUTOCOMPLETE, () -> new AutoCompletePage().getView());
@@ -64,6 +68,9 @@ public class App extends Application {
         }
         sidebar.setActive(page);
         root.setCenter(openedPages.computeIfAbsent(page, name -> builder.get()));
+        if (page.equals(Sidebar.HOME) && home != null) {
+            home.refresh(); // Home is reused, so reload its numbers every time it is shown
+        }
     }
 
     public static void main(String[] args) {

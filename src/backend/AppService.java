@@ -491,6 +491,20 @@ public class AppService {
         return rows;
     }
 
+        // ---------------- Import ----------------
+
+    /** Runs an import on its own connection, then makes the generator reload the new counts. */
+    public FileImporter.Result importFile(java.io.File file, FileImporter.Options options,
+                                          FileImporter.ProgressListener listener,
+                                          java.util.concurrent.atomic.AtomicBoolean cancel)
+            throws java.io.IOException, SQLException, FileImporter.CancelledException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            FileImporter.Result result = new FileImporter().importFile(conn, file, options, listener, cancel);
+            invalidateGenerator();
+            return result;
+        }
+    }
+
     private static void bind(PreparedStatement ps, List<Object> params) throws SQLException {
         for (int i = 0; i < params.size(); i++) {
             ps.setObject(i + 1, params.get(i));
