@@ -491,18 +491,44 @@ public class AppService {
         return rows;
     }
 
-        // ---------------- Import ----------------
+    // ---------------- Import ----------------
 
-    /** Runs an import on its own connection, then makes the generator reload the new counts. */
+    /**
+     * Runs an import on its own connection, then makes the generator reload the new
+     * counts.
+     */
     public FileImporter.Result importFile(java.io.File file, FileImporter.Options options,
-                                          FileImporter.ProgressListener listener,
-                                          java.util.concurrent.atomic.AtomicBoolean cancel)
+            FileImporter.ProgressListener listener,
+            java.util.concurrent.atomic.AtomicBoolean cancel)
             throws java.io.IOException, SQLException, FileImporter.CancelledException {
         try (Connection conn = DatabaseManager.getConnection()) {
             FileImporter.Result result = new FileImporter().importFile(conn, file, options, listener, cancel);
             invalidateGenerator();
             return result;
         }
+    }
+
+    /** Top words by "count", "start" or "end", highest first. */
+    public List<WordRow> getTopWords(String by, int limit) throws SQLException {
+        String col = switch (by) {
+            case "start" -> "start_count";
+            case "end" -> "end_count";
+            default -> "frequency";
+        };
+        String sql = "SELECT word_id, word_text, frequency, start_count, end_count FROM words "
+                + "WHERE " + col + " > 0 ORDER BY " + col + " DESC, word_text ASC LIMIT ?";
+        List<WordRow> rows = new ArrayList<>();
+        try (Connection conn = DatabaseManager.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    rows.add(new WordRow(rs.getInt(1), rs.getString(2), rs.getInt(3),
+                            rs.getInt(4), rs.getInt(5), 0));
+                }
+            }
+        }
+        return rows;
     }
 
     private static void bind(PreparedStatement ps, List<Object> params) throws SQLException {
