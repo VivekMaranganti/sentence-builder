@@ -24,16 +24,30 @@ public class App extends Application {
     // reused.
     private final Map<String, Supplier<Parent>> pages = new HashMap<>();
     private final Map<String, Parent> openedPages = new HashMap<>();
+    // Pages that reload their data every time they are shown
+    private final Map<String, Runnable> refreshers = new HashMap<>();
 
     @Override
     public void start(Stage stage) {
-        pages.put(Sidebar.HOME, () -> new HomePage(this::show, service).getView());
-        pages.put(Sidebar.IMPORT, () -> new ImportPage().getView());
+        pages.put(Sidebar.HOME, () -> {
+            HomePage p = new HomePage(this::show, service);
+            refreshers.put(Sidebar.HOME, p::refresh);
+            return p.getView();
+        });
+        pages.put(Sidebar.IMPORT, () -> new ImportPage(service).getView());
         pages.put(Sidebar.GENERATE, () -> new GeneratePage(service).getView());
-        pages.put(Sidebar.BATCH, () -> new BatchPage().getView());
-        pages.put(Sidebar.AUTOCOMPLETE, () -> new AutoCompletePage().getView());
-        pages.put(Sidebar.WORDS, () -> new WordExplorerPage().getView());
-        pages.put(Sidebar.REPORTS, () -> new ReportsPage().getView());
+        pages.put(Sidebar.BATCH, () -> new BatchPage(service).getView());
+        pages.put(Sidebar.AUTOCOMPLETE, () -> new AutoCompletePage(service).getView());
+        pages.put(Sidebar.WORDS, () -> {
+            WordExplorerPage p = new WordExplorerPage(service);
+            refreshers.put(Sidebar.WORDS, p::refresh);
+            return p.getView();
+        });
+        pages.put(Sidebar.REPORTS, () -> {
+            ReportsPage p = new ReportsPage(service);
+            refreshers.put(Sidebar.REPORTS, p::refresh);
+            return p.getView();
+        });
 
         root.setLeft(sidebar.getView());
         show(Sidebar.HOME);
@@ -64,6 +78,10 @@ public class App extends Application {
         }
         sidebar.setActive(page);
         root.setCenter(openedPages.computeIfAbsent(page, name -> builder.get()));
+        Runnable refresh = refreshers.get(page);
+        if (refresh != null) {
+            refresh.run();
+        }
     }
 
     public static void main(String[] args) {
